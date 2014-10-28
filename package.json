@@ -1,0 +1,17 @@
+{
+  "name": "todomvc",
+  "version": "0.1.0",
+  "description": "A TodoMVC implementation using jsiom",
+  "keywords": ["todomvc"],
+  "dependencies": {
+    "app": "jsiom/app",
+    "immutable": "2",
+    "cuid": "1"
+  },
+  "devDependencies": {
+    "serve": "jkroso/serve"
+  },
+  "repository": "git://github.com/jsiom/todomvc.git",
+  "author": "Jake Rosoman",
+  "license": "MIT"
+}
