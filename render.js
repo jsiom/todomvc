@@ -1,4 +1,4 @@
-var Map = require('immutable').Map
+var Todo = require('immutable').Map
 var cuid = require('cuid')
 
 module.exports = app
@@ -18,22 +18,20 @@ function header(state) {
     ['input#new-todo', {
       placeholder: 'What needs to be done?',
       value: state.get('field'),
-      isfocused: state.get('todos').toVector().every(function(todo){
-        return !todo.get('editing')
-      }),
+      isfocused: state.get('todos').every(function(todo){ return !todo.get('editing') }),
       name: 'newTodo',
       onKeydown: function addTodo(event){
         if (event.which != 13/*enter*/) return
         var title = event.target.value.trim()
         if (title == '') return
-        state.update('todos', function(todos){
-         return todos.toVector().push(Map({
-           completed: false,
-           editing: false,
-           title: title,
-           id: cuid()
-         }))
-        }).set('field', '')
+        var value = state.value.set('field', '')
+        var todos = value.get('todos').push(Todo({
+          completed: false,
+          editing: false,
+          title: title,
+          id: cuid()
+        }))
+        state.update(value.set('todos', todos))
       },
       onKeyup: function saveField(event){
         state.set('field', event.target.value)
@@ -42,45 +40,34 @@ function header(state) {
 }
 
 function mainSection(todos, route) {
-  var visibleTodos = todos.filter(function(todo){
-    return route === 'completed' && todo.get('completed')
-      || route === 'active' && !todo.get('completed')
-      || route === 'all'
-  })
-
-  return ['section#main', {hidden: !todos.toVector().length},
+  return ['section#main', {hidden: todos.value.size == 0},
     ['input#toggle-all', {
       type: 'checkbox',
       name: 'toggle',
-      checked: todos.toVector().every(function(todo){ return todo.get('completed') }),
+      checked: todos.every(function(todo){ return todo.get('completed') }),
       onChange: function toggleAll(event) {
-        todos.update(function(todos){
-          return todos.map(function(todo){
-            return todo.set('completed', event.target.checked)
-          }).toVector()
-        })
+        todos.map(function(todo){
+          return todo.set('completed', event.target.checked)
+        }).commit()
       }
     }],
-    ['label', {htmlFor: 'toggle-all'}, 'Mark all as complete'],
     ['ul#todo-list',
-      visibleTodos.map(function(todo, index){
+      todos.map(function(todo, index){
+        if (route == 'completed' && !todo.get('completed')) return null
+        if (route == 'active' && todo.get('completed')) return null
         return todoItem(todo, index, todos)
-      }).toJS()]]
+      }).value.toArray().filter(Boolean)]]
 }
 
 function todoItem(todo, index, todos) {
   function finishEdit(event){
     var title = event.target.value.trim()
-    if (!todo.get('editing')) return
-    if (title == '') return destroy(todos, index)
-    todo.withMutations(function(todo){
-      todo.set('editing', false)
-      todo.set('title', title)
-    })
+    if (title == '') todos.remove(index).commit()
+    else todo.merge({editing: false, title: title})
   }
   return ['li',
-    {className: (todo.get('completed') ? 'completed ': '')
-              + (todo.get('editing') ? 'editing' : '')},
+    {class: {completed: todo.get('completed'),
+             editing: todo.get('editing')}},
     ['.view',
       ['input.toggle', {
         type: 'checkbox',
@@ -90,11 +77,11 @@ function todoItem(todo, index, todos) {
         }
       }],
       ['label', {
-        onDblclick: function edit(event) {
+        onDblclick: function edit() {
           todo.set('editing', true)
         }
       }, todo.get('title')],
-      ['button.destroy', {onClick: destroy.bind(null, todos, index)}]],
+      ['button.destroy', {onClick:function(){ todos.remove(index).commit() }}]],
     ['input.edit', {
       value: todo.get('title'),
       name: 'title',
@@ -110,38 +97,29 @@ function todoItem(todo, index, todos) {
     }]]
 }
 
-function destroy(todos, index){
-  todos.update(function(todos){
-    return todos.splice(index, 1).toVector()
-  })
+function statsSection(todos, route) {
+  var todosLeft = todos.value.filter(notCompleted).size
+  return ['footer#footer', {hidden: todos.value.size == 0},
+    ['span#todo-count',
+      ['strong', String(todosLeft), todosLeft == 1 ? ' item' : ' items', ' left']],
+    ['ul#filters',
+      link('#', 'All', route == 'all'),
+      link('#active', 'Active', route == 'active'),
+      link('#completed', 'Completed', route == 'completed')],
+    ['button#clear-completed', {
+      hidden: todos.value.size == todosLeft,
+      onClick: function clearCompleted(){
+        todos.filter(notCompleted).commit()
+      }
+    }, 'Clear completed (', String(todos.value.size - todosLeft), ')']]
 }
 
-function statsSection(todos, route) {
-  var todosLeft = todos.filter(function(todo){
-    return !todo.get('completed')
-  }).toVector().length
-
-  return ['footer#footer', {hidden: !todos.toVector().length},
-    ['span#todo-count',
-      ['strong', String(todosLeft), todosLeft === 1 ? ' item' : ' items', ' left']],
-    ['ul#filters',
-      link('#', 'All', route === 'all'),
-      link('#active', 'Active', route === 'active'),
-      link('#completed', 'Completed', route === 'completed')],
-    ['button#clear-completed', {
-      hidden: todos.toVector().length === todosLeft,
-      onClick: function clearCompleted(){
-        todos.update(function(todos){
-          return todos.filter(function(todo){
-            return !todo.get('completed')
-          }).toVector()
-        })
-      }
-    }, 'Clear completed (', String(todos.toVector().length - todosLeft), ')']]
+function notCompleted(todo){
+  return !todo.get('completed')
 }
 
 function link(uri, text, selected) {
-  return ['li', ['a' + (selected ? '.selected' : ''), {href: uri}, text]]
+  return ['li', ['a', {class: {selected: selected}, href: uri}, text]]
 }
 
 function footer(){
