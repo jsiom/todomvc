@@ -19,7 +19,6 @@ function header(state) {
       placeholder: 'What needs to be done?',
       value: state.get('field'),
       isfocused: state.get('todos').every(function(todo){ return !todo.get('editing') }),
-      name: 'newTodo',
       onKeydown: function addTodo(event){
         if (event.which != 13/*enter*/) return
         var title = event.target.value.trim()
@@ -34,6 +33,7 @@ function header(state) {
         state.update(value.set('todos', todos))
       },
       onKeyup: function saveField(event){
+        if (event.which == 13/*enter*/) return
         state.set('field', event.target.value)
       }
     }]]
@@ -43,7 +43,6 @@ function mainSection(todos, route) {
   return ['section#main', {hidden: todos.value.size == 0},
     ['input#toggle-all', {
       type: 'checkbox',
-      name: 'toggle',
       checked: todos.every(function(todo){ return todo.get('completed') }),
       onChange: function toggleAll(event) {
         todos.map(function(todo){
@@ -84,13 +83,14 @@ function todoItem(todo, index, todos) {
       ['button.destroy', {onClick:function(){ todos.remove(index).commit() }}]],
     ['input.edit', {
       value: todo.get('title'),
-      name: 'title',
       isfocused: todo.get('editing'),
       onKeydown: function cancel(event){
         if (event.which == 27/*esc*/) todo.set('editing', false)
         if (event.which == 13/*enter*/) finishEdit(event)
       },
       onKeyup: function save(event){
+        if (event.which == 13/*enter*/) return
+        if (event.which == 27/*esc*/) return
         todo.set('title', event.target.value)
       },
       onBlur: finishEdit
