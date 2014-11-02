@@ -18,6 +18,7 @@ function header(state) {
     ['input#new-todo', {
       placeholder: 'What needs to be done?',
       value: state.get('field'),
+      type: 'text',
       isfocused: state.get('todos').every(function(todo){ return !todo.get('editing') }),
       onKeydown: function addTodo(event){
         if (event.which != 13/*enter*/) return
@@ -32,9 +33,10 @@ function header(state) {
         }))
         state.update(value.set('todos', todos))
       },
-      onKeyup: function saveField(event){
+      onKeypress: function(event){
         if (event.which == 13/*enter*/) return
-        state.set('field', event.target.value)
+        var char = String.fromCharCode(event.charCode)
+        return state.set('field', event.target.value + char)
       }
     }]]
 }
@@ -46,7 +48,7 @@ function mainSection(todos, route) {
       checked: todos.every(function(todo){ return todo.get('completed') }),
       onChange: function toggleAll(event) {
         todos.map(function(todo){
-          return todo.set('completed', event.target.checked)
+          return todo.value.set('completed', event.target.checked)
         }).commit()
       }
     }],
@@ -75,11 +77,7 @@ function todoItem(todo, index, todos) {
           todo.set('completed', !todo.get('completed'))
         }
       }],
-      ['label', {
-        onDblclick: function edit() {
-          todo.set('editing', true)
-        }
-      }, todo.get('title')],
+      ['label', {onDblclick:function(){todo.set('editing', true)}}, todo.get('title')],
       ['button.destroy', {onClick:function(){ todos.remove(index).commit() }}]],
     ['input.edit', {
       value: todo.get('title'),
@@ -88,10 +86,10 @@ function todoItem(todo, index, todos) {
         if (event.which == 27/*esc*/) todo.set('editing', false)
         if (event.which == 13/*enter*/) finishEdit(event)
       },
-      onKeyup: function save(event){
+      onKeypress: function save(event){
         if (event.which == 13/*enter*/) return
-        if (event.which == 27/*esc*/) return
-        todo.set('title', event.target.value)
+        var char = String.fromCharCode(event.charCode)
+        todo.set('title', event.target.value + char)
       },
       onBlur: finishEdit
     }]]
