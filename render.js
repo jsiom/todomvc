@@ -61,27 +61,15 @@ function mainSection(todos, route) {
 }
 
 function todoItem(todo, index, todos) {
-  function finishEdit(event){
-    var title = event.target.value.trim()
-    if (title == '') todos.remove(index).commit()
-    else todo.merge({editing: false, title: title})
-  }
-  return ['li',
-    {class: {completed: todo.get('completed'),
-             editing: todo.get('editing')}},
-    ['.view',
-      ['input.toggle', {
-        type: 'checkbox',
-        checked: todo.get('completed'),
-        onChange: function toggle() {
-          todo.set('completed', !todo.get('completed'))
-        }
-      }],
-      ['label', {onDblclick:function(){todo.set('editing', true)}}, todo.get('title')],
-      ['button.destroy', {onClick:function(){ todos.remove(index).commit() }}]],
-    ['input.edit', {
+  if (todo.get('editing')) {
+    var finishEdit = function(event){
+      var title = event.target.value.trim()
+      if (title == '') todos.remove(index).commit()
+      else todo.merge({editing: false, title: title})
+    }
+    return ['input.edit', {
       value: todo.get('title'),
-      isfocused: todo.get('editing'),
+      isfocused: true,
       onKeydown: function cancel(event){
         if (event.which == 27/*esc*/) todo.set('editing', false)
         if (event.which == 13/*enter*/) finishEdit(event)
@@ -92,7 +80,18 @@ function todoItem(todo, index, todos) {
         todo.set('title', event.target.value + char)
       },
       onBlur: finishEdit
-    }]]
+    }]
+  }
+  return ['li', {class: {completed: todo.get('completed')}},
+    ['input.toggle', {
+      type: 'checkbox',
+      checked: todo.get('completed'),
+      onChange: function toggle() {
+        todo.set('completed', !todo.get('completed'))
+      }
+    }],
+    ['label', {onDblclick:function(){todo.set('editing', true)}}, todo.get('title')],
+    ['button.destroy', {onClick:function(){ todos.remove(index).commit() }}]]
 }
 
 function statsSection(todos, route) {
