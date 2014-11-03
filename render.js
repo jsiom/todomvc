@@ -46,7 +46,7 @@ function mainSection(todos, route) {
     ['input#toggle-all', {
       type: 'checkbox',
       checked: todos.every(function(todo){ return todo.get('completed') }),
-      onChange: function toggleAll(event) {
+      onClick: function toggleAll(event) {
         todos.map(function(todo){
           return todo.value.set('completed', event.target.checked)
         }).commit()
@@ -86,8 +86,9 @@ function todoItem(todo, index, todos) {
     ['input.toggle', {
       type: 'checkbox',
       checked: todo.get('completed'),
-      onChange: function toggle() {
+      onClick: function toggle(event) {
         todo.set('completed', !todo.get('completed'))
+        event.preventDefault()
       }
     }],
     ['label', {onDblclick:function(){todo.set('editing', true)}}, todo.get('title')],
