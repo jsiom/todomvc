@@ -4,10 +4,6 @@ body {
     padding: 0;
 }
 
-.todomvc-wrapper {
-    visibility: visible !important;
-}
-
 button {
     margin: 0;
     padding: 0;
@@ -114,8 +110,8 @@ input[type="checkbox"] {
     border-top-right-radius: 1px;
 }
 
-#new-todo,
-.edit {
+#header > input,
+#todo-list > input {
     position: relative;
     margin: 0;
     width: 100%;
@@ -139,7 +135,7 @@ input[type="checkbox"] {
     font-smoothing: antialiased;
 }
 
-#new-todo {
+#header > input {
     padding: 16px 16px 16px 60px;
     border: none;
     background: rgba(0, 0, 0, 0.02);
@@ -151,10 +147,6 @@ input[type="checkbox"] {
     position: relative;
     z-index: 2;
     border-top: 1px dotted #adadad;
-}
-
-label[for='toggle-all'] {
-    display: none;
 }
 
 #toggle-all {
@@ -194,11 +186,15 @@ label[for='toggle-all'] {
     border-bottom: none;
 }
 
-#todo-list input.edit {
+#todo-list > input {
     display: block;
     width: 506px;
-    padding: 12px 17px 12px 17px;
-    margin: 0 0 0 43px;
+    padding: 12px 17px 12px 16px;
+    margin-left: 43px;
+}
+
+#todo-list > input:last-child {
+    padding-bottom: 11px;
 }
 
 #todo-list li .toggle {

@@ -12,5 +12,5 @@ app.on('redraw', function saveState(){
 })
 
 window.addEventListener('hashchange', function setRoute(){
-  app.state.set('route', location.hash.slice(1) || 'all')
+  app.state.get('route').update(location.hash.slice(1) || 'all')
 })

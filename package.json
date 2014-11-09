@@ -4,6 +4,7 @@
   "description": "A TodoMVC implementation using jsiom",
   "keywords": ["todomvc"],
   "dependencies": {
+    "create": "jsiom/create",
     "app": "jsiom/app",
     "immutable": "3",
     "cuid": "1"

@@ -1,3 +1,5 @@
+var TextInput = require('./text-input')
+var Checkbox = require('./checkbox')
 var Todo = require('immutable').Map
 var cuid = require('cuid')
 
@@ -7,22 +9,19 @@ function app(state) {
   return ['.todomvc-wrapper',
     ['section#todoapp',
       [header, state],
-      [mainSection, state.get('todos'), state.get('route')],
-      [statsSection, state.get('todos'), state.get('route')]],
+      [mainSection, state.get('todos'), state.get('route').value],
+      [statsSection, state.get('todos'), state.get('route').value]],
     [footer]]
 }
 
 function header(state) {
   return ['header#header',
     ['h1', 'Todos'],
-    ['input#new-todo', {
+    TextInput(state.get('field'), {
       placeholder: 'What needs to be done?',
-      value: state.get('field'),
-      type: 'text',
-      isfocused: state.get('todos').every(function(todo){ return !todo.get('editing') }),
-      onKeydown: function addTodo(event){
-        if (event.which != 13/*enter*/) return
-        var title = event.target.value.trim()
+      isfocused: state.value.get('todos').every(notEditing),
+      onSubmit: function addTodo(title){
+        title = title.trim()
         if (title == '') return
         var value = state.value.set('field', '')
         var todos = value.get('todos').push(Todo({
@@ -32,13 +31,8 @@ function header(state) {
           id: cuid()
         }))
         state.update(value.set('todos', todos))
-      },
-      onKeypress: function(event){
-        if (event.which == 13/*enter*/) return
-        var char = String.fromCharCode(event.charCode)
-        return state.set('field', event.target.value + char)
       }
-    }]]
+    })]
 }
 
 function mainSection(todos, route) {
@@ -48,58 +42,47 @@ function mainSection(todos, route) {
       checked: todos.every(function(todo){ return todo.get('completed') }),
       onClick: function toggleAll(event) {
         todos.map(function(todo){
-          return todo.value.set('completed', event.target.checked)
+          return todo.set('completed', event.target.checked)
         }).commit()
       }
     }],
     ['ul#todo-list',
-      todos.map(function(todo, index){
+      todos.value.map(function(todo, index){
         if (route == 'completed' && !todo.get('completed')) return null
         if (route == 'active' && todo.get('completed')) return null
-        return todoItem(todo, index, todos)
-      }).value.toArray().filter(Boolean)]]
+        return todoItem(todos.get(index), index, todos)
+      }).toArray().filter(Boolean)]]
 }
 
 function todoItem(todo, index, todos) {
-  if (todo.get('editing')) {
-    var finishEdit = function(event){
-      var title = event.target.value.trim()
-      if (title == '') todos.remove(index).commit()
-      else todo.merge({editing: false, title: title})
-    }
-    return ['input.edit', {
-      value: todo.get('title'),
+  if (todo.get('editing').value) {
+    return TextInput(todo.get('title'), {
       isfocused: true,
-      onKeydown: function cancel(event){
-        if (event.which == 27/*esc*/) todo.set('editing', false)
-        if (event.which == 13/*enter*/) finishEdit(event)
+      onCancel: function cancel(){
+        todo.set('editing', false).commit()
       },
-      onKeypress: function save(event){
-        if (event.which == 13/*enter*/) return
-        var char = String.fromCharCode(event.charCode)
-        todo.set('title', event.target.value + char)
-      },
-      onBlur: finishEdit
-    }]
-  }
-  return ['li', {class: {completed: todo.get('completed')}},
-    ['input.toggle', {
-      type: 'checkbox',
-      checked: todo.get('completed'),
-      onClick: function toggle(event) {
-        todo.set('completed', !todo.get('completed'))
-        event.preventDefault()
+      onSubmit: function save(title){
+        var title = title.trim()
+        if (title == '') todos.remove(index).commit()
+        else todo.merge({editing: false, title: title}).commit()
       }
-    }],
-    ['label', {onDblclick:function(){todo.set('editing', true)}}, todo.get('title')],
-    ['button.destroy', {onClick:function(){ todos.remove(index).commit() }}]]
+    })
+  }
+  return ['li', {class: {completed: todo.get('completed').value}},
+    [Checkbox, todo.get('completed')],
+    ['label', {
+      onDblclick: function(){ todo.set('editing', true).commit() }
+    }, todo.get('title').value],
+    ['button.destroy', {
+      onClick:function(){ todos.remove(index).commit() }
+    }]]
 }
 
 function statsSection(todos, route) {
   var todosLeft = todos.value.filter(notCompleted).size
   return ['footer#footer', {hidden: todos.value.size == 0},
     ['span#todo-count',
-      ['strong', String(todosLeft), todosLeft == 1 ? ' item' : ' items', ' left']],
+      ['b', String(todosLeft)], todosLeft == 1 ? ' item' : ' items', ' left'],
     ['ul#filters',
       link('#', 'All', route == 'all'),
       link('#active', 'Active', route == 'active'),
@@ -114,6 +97,10 @@ function statsSection(todos, route) {
 
 function notCompleted(todo){
   return !todo.get('completed')
+}
+
+function notEditing(todo){
+  return !todo.get('editing')
 }
 
 function link(uri, text, selected) {
