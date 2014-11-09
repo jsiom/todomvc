@@ -3,9 +3,7 @@ var Checkbox = require('./checkbox')
 var Todo = require('immutable').Map
 var cuid = require('cuid')
 
-module.exports = app
-
-function app(state) {
+module.exports = function app(state) {
   return ['.todomvc-wrapper',
     ['section#todoapp',
       [header, state],
@@ -45,12 +43,11 @@ function mainSection(todos, route) {
         })
       }
     }],
-    ['ul#todo-list',
-      todos.value.map(function(todo, index){
-        if (route == 'completed' && !todo.get('completed')) return null
-        if (route == 'active' && todo.get('completed')) return null
-        return todoItem(todos.get(index), index, todos)
-      }).toArray().filter(Boolean)]]
+    ['ul#todo-list', todos.value.toArray().map(function(todo, index){
+      if (route == 'completed' && !todo.get('completed')) return null
+      if (route == 'active' && todo.get('completed')) return null
+      return todoItem(todos.get(index), index, todos)
+    })]]
 }
 
 function todoItem(todo, index, todos) {
@@ -88,13 +85,8 @@ function statsSection(todos, route) {
     }, 'Clear completed (', String(todos.value.size - todosLeft), ')']]
 }
 
-function notCompleted(todo){
-  return !todo.get('completed')
-}
-
-function notEditing(todo){
-  return !todo.get('editing')
-}
+function notCompleted(todo){ return !todo.get('completed') }
+function notEditing(todo){ return !todo.get('editing') }
 
 function link(uri, text, selected) {
   return ['li', ['a', {class: {selected: selected}, href: uri}, text]]
