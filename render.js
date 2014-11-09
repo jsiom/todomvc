@@ -9,8 +9,8 @@ function app(state) {
   return ['.todomvc-wrapper',
     ['section#todoapp',
       [header, state],
-      [mainSection, state.get('todos'), state.get('route').value],
-      [statsSection, state.get('todos'), state.get('route').value]],
+      [mainSection, state.get('todos'), state.value.get('route')],
+      [statsSection, state.get('todos'), state.value.get('route')]],
     [footer]]
 }
 
@@ -21,16 +21,15 @@ function header(state) {
       placeholder: 'What needs to be done?',
       isfocused: state.value.get('todos').every(notEditing),
       onSubmit: function addTodo(title){
-        title = title.trim()
-        if (title == '') return
-        var value = state.value.set('field', '')
-        var todos = value.get('todos').push(Todo({
-          completed: false,
-          editing: false,
-          title: title,
-          id: cuid()
-        }))
-        state.update(value.set('todos', todos))
+        title.trim().length && state.merge({
+          field: '',
+          todos: state.value.get('todos').push(Todo({
+            completed: false,
+            editing: false,
+            title: title.trim(),
+            id: cuid()
+          }))
+        })
       }
     })]
 }
@@ -39,11 +38,11 @@ function mainSection(todos, route) {
   return ['section#main', {hidden: todos.value.size == 0},
     ['input#toggle-all', {
       type: 'checkbox',
-      checked: todos.every(function(todo){ return todo.get('completed') }),
+      checked: todos.value.every(function(todo){ return todo.get('completed') }),
       onClick: function toggleAll(event) {
         todos.map(function(todo){
           return todo.set('completed', event.target.checked)
-        }).commit()
+        })
       }
     }],
     ['ul#todo-list',
@@ -55,27 +54,23 @@ function mainSection(todos, route) {
 }
 
 function todoItem(todo, index, todos) {
-  if (todo.get('editing').value) {
+  if (todo.value.get('editing')) {
     return TextInput(todo.get('title'), {
       isfocused: true,
       onCancel: function cancel(){
-        todo.set('editing', false).commit()
+        todo.set('editing', false)
       },
       onSubmit: function save(title){
         var title = title.trim()
-        if (title == '') todos.remove(index).commit()
-        else todo.merge({editing: false, title: title}).commit()
+        if (title == '') todos.remove(index)
+        else todo.merge({editing: false, title: title})
       }
     })
   }
-  return ['li', {class: {completed: todo.get('completed').value}},
+  return ['li', {class: {completed: todo.value.get('completed')}},
     [Checkbox, todo.get('completed')],
-    ['label', {
-      onDblclick: function(){ todo.set('editing', true).commit() }
-    }, todo.get('title').value],
-    ['button.destroy', {
-      onClick:function(){ todos.remove(index).commit() }
-    }]]
+    ['label', {onDblclick: function(){ todo.set('editing', true) }}, todo.value.get('title')],
+    ['button.destroy', {onClick: function(){ todos.remove(index) }}]]
 }
 
 function statsSection(todos, route) {
@@ -89,9 +84,7 @@ function statsSection(todos, route) {
       link('#completed', 'Completed', route == 'completed')],
     ['button#clear-completed', {
       hidden: todos.value.size == todosLeft,
-      onClick: function clearCompleted(){
-        todos.filter(notCompleted).commit()
-      }
+      onClick: function clearCompleted(){ todos.filter(notCompleted) }
     }, 'Clear completed (', String(todos.value.size - todosLeft), ')']]
 }
 
