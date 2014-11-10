@@ -52,11 +52,11 @@ function todoItem(todo) {
   if (todo.value.get('editing')) {
     return TextInput(todo.get('title'), {
       isfocused: true,
-      onCancel: function(){ todo.set('editing', false) },
+      onCancel: function undo(){ todo.set('editing', false) },
+      onBlur: function save(event){ this.emit('submit', event.target.value) },
       onSubmit: function save(title){
-        var title = title.trim()
-        if (title == '') todo.destroy()
-        else todo.merge({editing: false, title: title})
+        if (!title.trim()) todo.destroy()
+        else todo.set('editing', false)
       }
     })
   }
