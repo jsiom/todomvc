@@ -9,7 +9,7 @@ function TextInput(cursor, props){
 TextInput.prototype = create(['input', {
   type: 'text',
   onKeydown: function handleSubmit(event){
-    if (event.which ==  8/*delete*/) this.cursor.update(this.cursor.value.slice(0, -1))
+    if (event.which ==  8/*delete*/) this.cursor.slice(0, -1)
     if (event.which == 13/*enter*/) this.emit('submit', event.target.value)
     if (event.which == 27/*esc*/) this.emit('cancel')
   },
