@@ -3,12 +3,15 @@ var Checkbox = require('checkbox')
 var Todo = require('immutable').Map
 
 module.exports = function app(state) {
-  return ['.todomvc-wrapper',
+  return ['.wrapper',
     ['section#todoapp',
       [header, state],
       [mainSection, state.get('todos'), state.value.get('route')],
       [statsSection, state.get('todos'), state.value.get('route')]],
-    [footer]]
+    ['footer#info',
+      ['p', 'Double-click to edit a todo'],
+      ['p', 'Written by ', ['a', {href: 'http://github.com/jkroso'}, 'Jake Rosoman']],
+      ['p', 'Part of ', ['a', { href: 'http://todomvc.com' }, 'TodoMVC']]]]
 }
 
 function header(state) {
@@ -81,13 +84,6 @@ function statsSection(todos, route) {
 
 function link(uri, text, selected) {
   return ['li', ['a', {class: {selected: selected}, href: uri}, text]]
-}
-
-function footer(){
-  return ['footer#info',
-    ['p', 'Double-click to edit a todo'],
-    ['p', 'Written by ', ['a', {href: 'http://github.com/jkroso'}, 'Jake Rosoman']],
-    ['p', 'Part of ', ['a', { href: 'http://todomvc.com' }, 'TodoMVC']]]
 }
 
 function notCompleted(todo){ return !todo.get('completed') }
