@@ -4,7 +4,8 @@
   "description": "A TodoMVC implementation using jsiom",
   "keywords": ["todomvc"],
   "dependencies": {
-    "create": "jsiom/create",
+    "text-input": "jsiom/text-input",
+    "checkbox": "jsiom/checkbox",
     "app": "jsiom/app",
     "immutable": "3"
   },

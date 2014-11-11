@@ -1,5 +1,5 @@
-var TextInput = require('./text-input')
-var Checkbox = require('./checkbox')
+var TextInput = require('text-input')
+var Checkbox = require('checkbox')
 var Todo = require('immutable').Map
 
 module.exports = function app(state) {
