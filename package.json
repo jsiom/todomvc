@@ -6,8 +6,7 @@
   "dependencies": {
     "create": "jsiom/create",
     "app": "jsiom/app",
-    "immutable": "3",
-    "cuid": "1"
+    "immutable": "3"
   },
   "devDependencies": {
     "serve": "jkroso/serve"

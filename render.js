@@ -1,7 +1,6 @@
 var TextInput = require('./text-input')
 var Checkbox = require('./checkbox')
 var Todo = require('immutable').Map
-var cuid = require('cuid')
 
 module.exports = function app(state) {
   return ['.todomvc-wrapper',
@@ -22,10 +21,9 @@ function header(state) {
         title.trim().length && state.merge({
           field: '',
           todos: state.value.get('todos').push(Todo({
-            completed: false,
-            editing: false,
             title: title.trim(),
-            id: cuid()
+            completed: false,
+            editing: false
           }))
         })
       }
