@@ -1,7 +1,7 @@
 var TextInput = require('text-input')
 var Checkbox = require('checkbox')
 var Todo = require('immutable').Map
-var time = require('./history')
+var tape = require('tape')
 
 module.exports = function app(state) {
   return ['.wrapper',
@@ -55,7 +55,7 @@ function todoItem(todo) {
     return TextInput(todo.get('title'), {
       isfocused: true,
       onCancel: function undo(){
-        time.backWhile(function(state){
+        tape.backWhile(function(state){
           return todo.call(state).get('editing')
         })
       },

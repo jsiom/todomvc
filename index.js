@@ -1,5 +1,5 @@
 var immutable = require('immutable').fromJS
-var time = require('./history')
+var tape = require('tape')
 var App = require('app')
 
 var data = localStorage.hasOwnProperty('todos-jsiom')
@@ -18,11 +18,11 @@ window.addEventListener('hashchange', function setRoute(){
   app.state.get('route').update(location.hash.slice(1) || 'all')
 }, true)
 
-time.constructor(app.atom)
+tape.constructor(app.atom)
 
 window.addEventListener('keydown', function(e){
   if (e.ctrlKey || e.altKey || e.shiftKey || !e.metaKey) return
-  if (e.which == 89/*y*/) time.forward()
-  if (e.which == 90/*z*/) time.back()
+  if (e.which == 89/*y*/) tape.forward()
+  if (e.which == 90/*z*/) tape.back()
   if (e.which == 90 || e.which == 89) e.preventDefault()
 }, true)

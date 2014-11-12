@@ -6,6 +6,7 @@
   "dependencies": {
     "text-input": "jsiom/text-input",
     "checkbox": "jsiom/checkbox",
+    "tape": "jsiom/tape",
     "app": "jsiom/app",
     "immutable": "3"
   },
