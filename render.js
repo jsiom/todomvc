@@ -1,6 +1,7 @@
 var TextInput = require('text-input')
 var Checkbox = require('checkbox')
 var Todo = require('immutable').Map
+var time = require('./history')
 
 module.exports = function app(state) {
   return ['.wrapper',
@@ -53,7 +54,11 @@ function todoItem(todo) {
   if (todo.value.get('editing')) {
     return TextInput(todo.get('title'), {
       isfocused: true,
-      onCancel: function undo(){ todo.set('editing', false) },
+      onCancel: function undo(){
+        time.backWhile(function(state){
+          return todo.call(state).get('editing')
+        })
+      },
       onBlur: function save(event){ this.emit('submit', event.target.value) },
       onSubmit: function save(title){
         if (!title.trim()) todo.destroy()
