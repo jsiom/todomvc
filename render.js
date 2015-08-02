@@ -35,7 +35,7 @@ function header(state) {
 }
 
 function mainSection(todos, route) {
-  return ['section#main', {hidden: todos.value.size == 0},
+  return ['section#main', {class:{hidden: todos.value.size == 0}},
     ['input#toggle-all', {
       type: 'checkbox',
       checked: todos.value.every(get('completed')),
@@ -74,7 +74,7 @@ function todoItem(todo) {
 
 function statsSection(todos, route) {
   var todosLeft = todos.value.filter(notCompleted).size
-  return ['footer#footer', {hidden: todos.value.size == 0},
+  return ['footer#footer', {class:{hidden: todos.value.size == 0}},
     ['span#todo-count',
       ['b', String(todosLeft)], todosLeft == 1 ? ' item' : ' items', ' left'],
     ['ul#filters',
@@ -82,7 +82,7 @@ function statsSection(todos, route) {
       link('#active', 'Active', route == 'active'),
       link('#completed', 'Completed', route == 'completed')],
     ['button#clear-completed', {
-      hidden: todos.value.size == todosLeft,
+      class: {hidden: todos.value.size == todosLeft},
       onClick: function clearCompleted(){ todos.filter(notCompleted) }
     }, 'Clear completed (', String(todos.value.size - todosLeft), ')']]
 }
