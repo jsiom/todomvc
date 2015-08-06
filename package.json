@@ -6,12 +6,16 @@
   "dependencies": {
     "text-input": "jsiom/text-input",
     "checkbox": "jsiom/checkbox",
+    "mana": "jkroso/mana",
     "tape": "jsiom/tape",
-    "app": "jsiom/app",
-    "immutable": "3"
+    "immutable": "3",
+    "babelify": "*"
   },
   "devDependencies": {
     "serve": "jkroso/serve"
+  },
+  "browserify": {
+    "transform": [["babelify", {"jsxPragma": "JSX","stage":0}]]
   },
   "repository": "git://github.com/jsiom/todomvc.git",
   "author": "Jake Rosoman",

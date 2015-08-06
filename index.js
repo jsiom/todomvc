@@ -1,26 +1,26 @@
-var immutable = require('immutable').fromJS
-var tape = require('tape')
-var App = require('app')
+const immutable = require('immutable').fromJS
+const App = require('mana/app')
+const tape = require('tape')
 
-var data = localStorage.hasOwnProperty('todos-jsiom')
+const data = localStorage.hasOwnProperty('todos-jsiom')
   ? JSON.parse(localStorage.getItem('todos-jsiom'))
   : {todos: [], field: ''}
 
 data.route = location.hash.slice(1) || 'all'
 
-var app = new App(immutable(data), require('./render'))
+const app = new App(immutable(data), require('./render'))
 
-app.on('redraw', function saveState(){
-  localStorage.setItem('todos-jsiom', JSON.stringify(this.state))
-})
+app.onRedraw = () => {
+  localStorage.setItem('todos-jsiom', JSON.stringify(app.state))
+}
 
-window.addEventListener('hashchange', function setRoute(){
+window.addEventListener('hashchange', () => {
   app.state.get('route').update(location.hash.slice(1) || 'all')
 }, true)
 
 tape.constructor(app.atom)
 
-window.addEventListener('keydown', function(e){
+window.addEventListener('keydown', e => {
   if (e.ctrlKey || e.altKey || e.shiftKey || !e.metaKey) return
   if (e.which == 89/*y*/) tape.forward()
   if (e.which == 90/*z*/) tape.back()
